@@ -16,7 +16,8 @@ MORRIGAN_ENV_FILE=$MORRIGAN_HOME/morrigan-env.sh
 rm -f $MORRIGAN_ENV_FILE
 
 # Create a file for logging installation progress.
-LOGFILE=$MORRIGAN_HOME/logs/install-dependencies.out
+MORRIGAN_LOGS=$MORRIGAN_HOME/logs
+LOGFILE=$MORRIGAN_LOGS/install-dependencies.out
 mkdir -p $MORRIGAN_HOME/logs
 rm -f $LOGFILE
 
@@ -104,6 +105,7 @@ MORRIGAN_PIN_HOME=$PWD/$(ls -d */)
 echo export PATH=$MORRIGAN_HOME/install/bin:'$PATH' >> $MORRIGAN_ENV_FILE
 echo export MORRIGAN_PIN_HOME=$MORRIGAN_PIN_HOME >> $MORRIGAN_ENV_FILE
 echo export MORRIGAN_HOME=$MORRIGAN_HOME >> $MORRIGAN_ENV_FILE
+echo export MORRIGAN_LOGS=$MORRIGAN_LOGS >> $MORRIGAN_ENV_FILE
 
 echo "MORRIGAN: Pin 3 successfully installed." >> $LOGFILE
 
