@@ -18,3 +18,17 @@ SST-Elements comes with an extensive suite of tests, most of which we don't need
 ```
 ... todo ...
 ```
+
+
+# Workflow 
+As mentioned above, this project relies on custom version of some other projects. If you want to make changes to those projects, you don't need to download them separately -- you can do that right from within this repo. Follow these steps to create changes and push them to our repos.
+
+```
+... todo ...
+```
+
+
+# Related Work
+
+1. TODO Cite Online Model Swapping paper
+2. TODO Cite reference on phase detection
