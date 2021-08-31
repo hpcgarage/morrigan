@@ -15,7 +15,7 @@ source morrigan-env.sh
 ```
 
 ## Making Changes
-After making changes to any of the submodules, re-run the `./install-morrigan.sh` script. You should not need to run `source` command again. 
+After making changes to any of the submodules, re-run the `./install-morrigan.sh` script. You should _not_ need to run the `source` command again. 
 
 
 ## Testing
