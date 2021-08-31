@@ -13,6 +13,8 @@ PREFIX=$MORRIGAN_HOME/install
 # The following file will contain necessary environment variables
 # after this script has run.
 OUTFILE=$MORRIGAN_HOME/morrigan-deps.sh
+rm -f $OUTFILE
+
 # Create a file for logging installation progress.
 LOGFILE=$MORRIGAN_HOME/logs/install-dependencies.out
 mkdir -p $MORRIGAN_HOME/logs
@@ -93,6 +95,16 @@ echo
 sleep 1
 
 # Install Pin3
+mkdir -p $MORRIGAN_HOME/install/packages/pin
+cd $MORRIGAN_HOME/install/packages/pin
+wget $PINURL
+tar xvzf *.tar.gz
+MORRIGAN_PIN_HOME=$PWD/$(ls -d */)
 
-# Install 
+echo export PATH=$MORRIGAN_HOME/bin:'$PATH' >> $OUTFILE
+echo export MORRIGAN_PIN_HOME=$MORRIGAN_PIN_HOME >> $OUTFILE
+
+echo
+echo "MORRIGAN: Autotools, Cmake, and Pin3 have been installed."
+echo "MORRIGAN: Update your path by running \"source $OUTFILE\"" | tee -a $LOGFILE
 
