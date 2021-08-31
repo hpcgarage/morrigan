@@ -2,6 +2,9 @@
 
 # This file downloads and installs dependencies of the Morrigan project.
 # It is designed to be run from the top directory of the project.
+
+set -euo pipefile
+
 MORRIGAN_HOME=$(pwd)
 
 # Tools will be installed at $PREFIX/
@@ -11,12 +14,18 @@ PREFIX=$MORRIGAN_HOME/install
 # after this script has run.
 OUTFILE=$MORRIGAN_HOME/morrigan-deps.sh
 
+# Create a file for logging installation progress.
+LOGFILE=$MORRIGAN_HOME/logs/install-dependencies.out
+mkdir -p $MORRIGAN_HOME/logs
+rm -f $LOGFILE
+
 # These versions are known to work with our project. Change them at your
 # own risk.
 M4_VERSION=1.4.18
 AUTOCONF_VERSION=2.69
 AUTOMAKE_VERSION=1.16.2
 LIBTOOL_VERSION=2.4.6
+
 
 #########################################################
 # You should not need to edit anything below this line! #
@@ -54,6 +63,8 @@ cd ../libtool-${LIBTOOL_VERSION}
 ./configure -C --prefix=$PREFIX && make && make install
 
 cd $MORRIGAN_HOME
+
+echo "MORRIGAN: Autotools successfully installed." | tee -a $LOGFILE
 
 #################
 # Install Cmake #
