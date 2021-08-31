@@ -3,7 +3,7 @@
 # This file downloads and installs dependencies of the Morrigan project.
 # It is designed to be run from the top directory of the project.
 
-set -euo pipefile
+set -euo pipefail
 
 MORRIGAN_HOME=$(pwd)
 
@@ -13,7 +13,6 @@ PREFIX=$MORRIGAN_HOME/install
 # The following file will contain necessary environment variables
 # after this script has run.
 OUTFILE=$MORRIGAN_HOME/morrigan-deps.sh
-
 # Create a file for logging installation progress.
 LOGFILE=$MORRIGAN_HOME/logs/install-dependencies.out
 mkdir -p $MORRIGAN_HOME/logs
@@ -25,6 +24,9 @@ M4_VERSION=1.4.18
 AUTOCONF_VERSION=2.69
 AUTOMAKE_VERSION=1.16.2
 LIBTOOL_VERSION=2.4.6
+
+CMAKEURL='https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-linux-x86_64.tar.gz'
+PINURL='https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.20-98437-gf02b61307-gcc-linux.tar.gz'
 
 
 #########################################################
@@ -64,11 +66,31 @@ cd ../libtool-${LIBTOOL_VERSION}
 
 cd $MORRIGAN_HOME
 
+echo
 echo "MORRIGAN: Autotools successfully installed." | tee -a $LOGFILE
+echo
+sleep 1
 
 #################
 # Install Cmake #
 #################
+
+mkdir -p deps/cmake
+mkdir -p $PREFIX/bin
+mkdir -p $PREFIX/share
+
+cd deps/cmake
+wget $CMAKEURL
+tar xzf *.tar.gz
+cd $(ls -d */)
+cp bin/* $PREFIX/bin/
+cp -r share/* $PREFIX/share/
+
+cd $MORRIGAN_HOME
+echo
+echo "MORRIGAN: Cmake successfully installed." | tee -a $LOGFILE
+echo
+sleep 1
 
 # Install Pin3
 

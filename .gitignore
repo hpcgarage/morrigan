@@ -1,1 +1,4 @@
 morrigan-env.sh
+logs/
+deps/
+install/
