@@ -1,0 +1,9 @@
+[submodule "sst-core"]
+	path = sst-core
+	url = git@github.com:hpcgarage/sst-core.git
+[submodule "sst-elements"]
+	path = sst-elements
+	url = git@github.com:hpcgarage/sst-elements.git
+[submodule "DRAMsim3"]
+	path = DRAMsim3
+	url = git@github.com:hpcgarage/DRAMsim3.git
