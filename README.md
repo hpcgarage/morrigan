@@ -38,14 +38,14 @@ As mentioned above, this project relies on custom version of some other projects
 ## Troubleshooting
 Some simple logs are generated in `logs/`. One file should be generated for each of the three scripts you run during the installation process. 
 
-### `install-dependencies.out`
+#### `install-dependencies.out`
 This file should have 4 lines of output. The first 3 should report that Autotools, Cmake, and Pin were install successfully, and the final should give the filename for the environment script.
 
-### `configure-morrigan.out`
+#### `configure-morrigan.out`
 
 `todo`
 
-### `install-morrigan.out`
+#### `install-morrigan.out`
 
 `todo`
 
