@@ -112,7 +112,7 @@ memory_params = {
 }
 dramsim3_params = {
     "access_time" : "1000ns",
-    "config_ini"  : "/home/plavin3/morrigan/DRAMsim3/configs/DDR3_1Gb_x8_1333.ini",
+    "config_ini"  : "../DRAMsim3/configs/DDR3_1Gb_x8_1333.ini",
     "mem_size"    : "1GiB",
 }
 
