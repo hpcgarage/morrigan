@@ -57,6 +57,13 @@ cd sst-elements
 # Remove Werror lmao
 find . -name Makefile.am -exec sed -i s'/-Werror//g' {} \;
 ./autogen.sh
+# Don't build elements listed in disabled-elements.txt
+while read p;
+do
+    sed -i "/ac_config_files.*$p/s/^/#/" configure
+    sed -i "/active_element_libraries.*$p/s/^/#/" configure
+done < $MORRIGAN_HOME/disabled-elements.txt
+
 ./configure --prefix=$SST_ELEMENTS_HOME --with-sst-core=$SST_CORE_HOME --with-pin=$MORRIGAN_PIN_HOME --with-dramsim3=$MORRIGAN_DRAMDIR
 #make all -j8
 #make install

@@ -11,7 +11,7 @@ cd morrigan
 git submodule update --init --recursive
 ./install-dependencies.sh
 ./configure-morrigan.sh # TODO: make sure this script pulls in the env for dependencies
-./install-morrigan.sh # TODO: make sure this script pulls in the end for dependencies
+./build-and-install-morrigan.sh # TODO: make sure this script pulls in the end for dependencies
 source morrigan-env.sh
 ```
 
