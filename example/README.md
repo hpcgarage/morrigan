@@ -1,0 +1,5 @@
+To run:
+
+```
+make test
+```
