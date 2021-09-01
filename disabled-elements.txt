@@ -5,7 +5,6 @@ firefly
 GNA
 hermes
 kingsley
-merlin
 Messier
 miranda
 Opal

@@ -10,8 +10,8 @@ git clone git@github.com:hpcgarage/morrigan.git
 cd morrigan
 git submodule update --init --recursive
 ./install-dependencies.sh
-./configure-morrigan.sh # TODO: make sure this script pulls in the env for dependencies
-./build-and-install-morrigan.sh # TODO: make sure this script pulls in the end for dependencies
+./configure-morrigan.sh
+./build-and-install-morrigan.sh
 source morrigan-env.sh
 ```
 
@@ -30,11 +30,7 @@ This file should have 4 lines of output. The first 3 should report that Autotool
 `todo`
 
 ## Testing
-SST-Elements comes with an extensive suite of tests, most of which we don't need for this project. Follow these steps to test your installation of this project and the relevant dependencies.
-
-```
-... todo ...
-```
+To test this code, view the README in the `example` folder.
 
 ## Making Changes
 After making changes to any of the submodules, re-run the `./install-morrigan.sh` script. You should _not_ need to run the `source` command again. 

@@ -110,6 +110,11 @@ memory_params = {
     "access_time" : "30ns",
     "mem_size" : str(memory_capacity // (groups * memory_controllers_per_group)) + "MiB",
 }
+dramsim3_params = {
+    "access_time" : "1000ns",
+    "config_ini"  : "/home/plavin3/sst-autoinstall/source/DRAMsim3/configs/DDR3_1Gb_x8_1333.ini",
+    "mem_size"    : "1GiB",
+}
 
 dc_params = {
     "coherence_protocol": coherence_protocol,
@@ -236,8 +241,8 @@ for next_group in range(groups):
 
         memctrl = sst.Component("memory_" + str(next_memory_ctrl_id), "memHierarchy.MemController")
         memctrl.addParams(memctrl_params)
-        memory = memctrl.setSubComponent("backend", "memHierarchy.simpleMem")
-        memory.addParams(memory_params)
+        memory = memctrl.setSubComponent("backend", "memHierarchy.dramsim3")
+        memory.addParams(dramsim3_params)
 
         dc = sst.Component("dc_" + str(next_memory_ctrl_id), "memHierarchy.DirectoryController")
         dc.addParams({
@@ -261,7 +266,7 @@ sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")
 sst.setStatisticOutputOptions( {
-    "filepath"  : "./stats-snb-ariel.csv",
+    "filepath"  : "./stats-snb-ariel-dramsim3.csv",
     "separator" : ", "
 } )
 

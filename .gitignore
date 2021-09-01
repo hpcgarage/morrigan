@@ -2,3 +2,6 @@ morrigan-env.sh
 logs/
 deps/
 install/
+example/stream
+example/dramsim3*
+example/stats*dramsim*
