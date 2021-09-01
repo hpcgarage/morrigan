@@ -19,8 +19,8 @@ SST_CORE_HOME=$MORRIGAN_HOME/install
 cd sst-core
 ./autogen.sh
 ./configure --prefix=$SST_CORE_HOME --disable-mpi
-#make all -j8
-#make install
+make all -j8
+make install
 
 cd $MORRIGAN_HOME
 
@@ -34,6 +34,7 @@ wait
 
 cd DRAMsim3
 cmake .
+make -j8
 MORRIGAN_DRAMDIR=$PWD
 cd $MORRIGAN_HOME
 

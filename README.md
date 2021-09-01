@@ -3,6 +3,7 @@
 The Morrígan project is aimed at adding phase detection and model swapping capabilities to the [Structural Simulation Toolkit](https://sst-simulator.org/). 
 
 ## Installation
+First install Python 3, then follow these instructions.
 
 ```
 git clone git@github.com:hpcgarage/morrigan.git
