@@ -16,7 +16,9 @@ We use the ECP Proxy Apps to exten our analysis to programs of interest to the H
 
 ### Simple Install
 
-If you do not care about using the exact same versions of every package as we did, simply execute the following command:
+First, edit the package.py for ecp-proxy-app to change the dependency for minivite from 1.0 to 1.1. This file is located at `spack/var/spack/repos/builtin/packages/ecp-proxy-apps/package.py`. Search for the line with `minivite` and change `1.0` to `1.1`. 
+
+Then run:
 
 ```
 spack install ecp-proxy-apps ^openmpi@3:3.9
@@ -24,4 +26,4 @@ spack install ecp-proxy-apps ^openmpi@3:3.9
 
 ### 
 
-To use the same versions of all the software as us
+To use the same versions of all the software as us ... TODO ...

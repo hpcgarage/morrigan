@@ -2,6 +2,8 @@ set -euo pipefail
 MORRIGAN_ENV_FILE=morrigan-env.sh
 . $MORRIGAN_ENV_FILE
 
+MORRIGAN_DEBUG=""
+
 if [ -z ${MORRIGAN_HOME+x} ];
 then
     echo "ERROR: MORRIGAN_HOME is unset";
@@ -18,7 +20,7 @@ SST_CORE_HOME=$MORRIGAN_HOME/install
 
 cd sst-core
 ./autogen.sh
-./configure --prefix=$SST_CORE_HOME --disable-mpi
+./configure CPPFLAGS="-fno-omit-frame-pointer" $MORRIGAN_DEBUG --prefix=$SST_CORE_HOME --disable-mpi
 make all -j8
 make install
 
@@ -33,7 +35,7 @@ wait
 
 
 cd DRAMsim3
-cmake .
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .
 make -j8
 MORRIGAN_DRAMDIR=$PWD
 cd $MORRIGAN_HOME
@@ -64,7 +66,7 @@ do
     sed -i "/active_element_libraries.*$p/s/^/#/" configure
 done < $MORRIGAN_HOME/disabled-elements.txt
 
-./configure --prefix=$SST_ELEMENTS_HOME --with-sst-core=$SST_CORE_HOME --with-pin=$MORRIGAN_PIN_HOME --with-dramsim3=$MORRIGAN_DRAMDIR
+./configure CPPFLAGS="-fno-omit-frame-pointer" $MORRIGAN_DEBUG --prefix=$SST_ELEMENTS_HOME --with-sst-core=$SST_CORE_HOME --with-pin=$MORRIGAN_PIN_HOME --with-dramsim3=$MORRIGAN_DRAMDIR
 #make all -j8
 #make install
 
