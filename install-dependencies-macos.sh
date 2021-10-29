@@ -1,4 +1,4 @@
-# File: install-dependencies.sh
+# File: install-dependencies-macos.sh
 
 # This file downloads and installs dependencies of the Morrigan project.
 # It is designed to be run from the top directory of the project.
@@ -28,7 +28,7 @@ AUTOCONF_VERSION=2.69
 AUTOMAKE_VERSION=1.16.2
 LIBTOOL_VERSION=2.4.6
 
-CMAKEURL='https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-macos-universal.tar.gz'
+CMAKEURL='https://github.com/Kitware/CMake/releases/download/v3.21.4/cmake-3.21.4-macos-universal.tar.gz'
 PINURL='https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.20-98437-gf02b61307-clang-mac.tar.gz'
 
 
@@ -82,6 +82,8 @@ mkdir -p deps/cmake
 mkdir -p $PREFIX/bin
 mkdir -p $PREFIX/share
 
+echo "MORRIGAN: Downloading Cmake." | tee -a $LOGFILE
+
 cd deps/cmake
 curl -L $CMAKEURL > cmake.tar.gz
 tar xzf *.tar.gz
@@ -95,10 +97,15 @@ echo "MORRIGAN: Cmake successfully installed." | tee -a $LOGFILE
 echo
 sleep 1
 
-# Install Pin3
+################
+# Install Pin3 #
+################
+
+echo "MORRIGAN: Downloading Pin 3." | tee -a $LOGFILE
+
 mkdir -p $MORRIGAN_HOME/install/packages/pin
 cd $MORRIGAN_HOME/install/packages/pin
-curl -L $PINURL > pin3.tar.gz
+curl -L $PINURL > pin-3.tar.gz
 tar xvzf *.tar.gz
 MORRIGAN_PIN_HOME=$PWD/$(ls -d */)
 
@@ -112,4 +119,3 @@ echo "MORRIGAN: Pin 3 successfully installed." >> $LOGFILE
 echo
 echo "MORRIGAN: Autotools, Cmake, and Pin3 have been installed."
 echo "MORRIGAN: Update your path by running \"source $MORRIGAN_ENV_FILE\"" | tee -a $LOGFILE
-
