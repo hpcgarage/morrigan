@@ -23,8 +23,7 @@ For macOS do the following steps.
 ```
 ./install-dependencies-macos.sh
 source morrigan-env.sh
-./configure-morrigan-macos.sh
-./build-and-install-morrigan.sh
+./install-morrigan-macos.sh
 ```
 
 ## Troubleshooting

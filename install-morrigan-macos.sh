@@ -78,8 +78,8 @@ do
 done < $MORRIGAN_HOME/disabled-elements.txt
 
 ./configure CPPFLAGS="-fno-omit-frame-pointer" $MORRIGAN_DEBUG --prefix=$SST_ELEMENTS_HOME --with-sst-core=$SST_CORE_HOME --with-pin=$MORRIGAN_PIN_HOME --with-dramsim3=$MORRIGAN_DRAMDIR
-#make all -j8
-#make install
+make all -j8
+make install
 
 cd $MORRIGAN_HOME
 
