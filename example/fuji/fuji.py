@@ -1,3 +1,7 @@
+# Information is pulled from
+# [ds.N] Page N of the A64FX (d)ata(s)heet, located in this directory at a64fx-datashee.pdf
+# [mm.N] Page N of the A64FX (m)icroarchitecture (m)anual, located at a64fx-microarchitecture-manual.pdf
+
 import sst
 import os
 
@@ -5,18 +9,23 @@ next_core_id = 0
 next_network_id = 0
 next_memory_ctrl_id = 0
 
-clock = "2660MHz"
+clock = "2000MHz"           # [ds.2] - Choose from 1.9, 2.0, or 2.1 GHz
 memory_clock = "200MHz"
-coherence_protocol = "MESI"
+coherence_protocol = "MESI" # [mm.64] - The L1D and the L2 both use MESI. The L1I uses SI
 
-cores_per_group = 2
-active_cores_per_group = 2
+# The Fujitsu A64FX has 13 cores per group but 1 is used for management.
+# TODO: Figure out the purpose of inactive cores in this sumulation.
+cores_per_group = 12
+active_cores_per_group = 12
 memory_controllers_per_group = 1
 groups = 4
+
 os.environ["OMP_NUM_THREADS"]=str(groups * cores_per_group)
 
-l3cache_blocks_per_group = 5
-l3cache_block_size = "1MB"
+# TODO: Remove all references to L3. The A64FX has no L3 cache.
+
+#l3cache_blocks_per_group = 5
+#l3cache_block_size = "1MB"
 
 ring_latency = "50ps"
 ring_bandwidth = "85GB/s"
@@ -60,47 +69,50 @@ topology_params = {
     "width" : "1",
 }
 
+# [mm.12] Each L1I is 64KiB, 4-way associative
 l1_params = {
     "coherence_protocol": coherence_protocol,
-    "cache_frequency": clock,
-    "replacement_policy": "lru",
-    "cache_size": "32KB",
-    "maxRequestDelay" : "1000000",
-    "associativity": 8,
-    "cache_line_size": 64,
-    "access_latency_cycles": 4,
+    "cache_frequency": clock,      #TODO
+    "replacement_policy": "lru",   #TODO
+    "cache_size": "64KB",
+    "maxRequestDelay" : "1000000", #TODO
+    "associativity": 4,
+    "cache_line_size": 256,
+    "access_latency_cycles": 4,    #TODO
     "L1": 1,
     "debug": 0
 }
 
+# [mm.12] Each L2 (one per CMG) is 8MiB, 16-way associative
 l2_params = {
     "coherence_protocol": coherence_protocol,
     "cache_frequency": clock,
-    "replacement_policy": "lru",
-    "cache_size": "256KB",
-    "associativity": 8,
-    "cache_line_size": 64,
-    "access_latency_cycles": 8,
-    "mshr_num_entries" : 16,
-    "mshr_latency_cycles" : 2,
+    "replacement_policy": "lru",   #TODO
+    "cache_size": "8MB",
+    "associativity": 16,
+    "cache_line_size": 256,
+    "access_latency_cycles": 8,    #TODO
+    "mshr_num_entries" : 16,       #TODO
+    "mshr_latency_cycles" : 2,     #TODO
     "debug": 0,
 }
 
-l3_params = {
-    "debug" : "0",
-    "access_latency_cycles" : "6",
-    "cache_frequency" : "2GHz",
-    "replacement_policy" : "lru",
-    "coherence_protocol" : coherence_protocol,
-    "associativity" : "4",
-    "cache_line_size" : "64",
-    "debug_level" : "10",
-    "cache_size" : "128 KB",
-    "mshr_num_entries" : "4096",
-    "mshr_latency_cycles" : 2,
-    "num_cache_slices" : str(groups * l3cache_blocks_per_group),
-    "slice_allocation_policy" : "rr"
-}
+# TODO: Remove references to l3
+#l3_params = {
+#    "debug" : "0",
+#    "access_latency_cycles" : "6",
+#    "cache_frequency" : "2GHz",
+#    "replacement_policy" : "lru",
+#    "coherence_protocol" : coherence_protocol,
+#    "associativity" : "4",
+#    "cache_line_size" : "64",
+#    "debug_level" : "10",
+#    "cache_size" : "128 KB",
+#    "mshr_num_entries" : "4096",
+#    "mshr_latency_cycles" : 2,
+#    "num_cache_slices" : str(groups * l3cache_blocks_per_group),
+#    "slice_allocation_policy" : "rr"
+#}
 
 memctrl_params = {
     "backing" : "none",
@@ -110,10 +122,11 @@ memory_params = {
     "access_time" : "30ns",
     "mem_size" : str(memory_capacity // (groups * memory_controllers_per_group)) + "MiB",
 }
+
 dramsim3_params = {
-    "access_time" : "1000ns",
-    "config_ini"  : "../DRAMsim3/configs/DDR3_1Gb_x8_1333.ini",
-    "mem_size"    : "1GiB",
+    "access_time" : "1000ns", #TODO
+    "config_ini"  : "../../DRAMsim3/configs/HBM2_8Gb_x128.in",
+    "mem_size"    : "8GiB",   #TODO
 }
 
 dc_params = {
@@ -266,8 +279,8 @@ sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")
 sst.setStatisticOutputOptions( {
-    "filepath"  : "./stats-snb-ariel-dramsim3.csv",
+    "filepath"  : "./stats-fuji.csv",
     "separator" : ", "
 } )
 
-print("Completed configuring the SST Sandy Bridge model")
+print("Completed configuring the A64FX model")
