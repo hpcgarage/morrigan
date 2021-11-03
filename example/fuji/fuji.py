@@ -14,7 +14,7 @@ memory_clock = "200MHz"
 coherence_protocol = "MESI" # [mm.64] - The L1D and the L2 both use MESI. The L1I uses SI
 
 # The Fujitsu A64FX has 13 cores per group but 1 is used for management.
-# TODO: Figure out the purpose of inactive cores in this sumulation.
+# TODO: Use inactive cores for programs running with less than all 48 threads
 cores_per_group = 12
 active_cores_per_group = 12
 memory_controllers_per_group = 1
@@ -69,66 +69,53 @@ topology_params = {
     "width" : "1",
 }
 
+#TODO  the latencies given in [mm] for the l1 and l2 are "load-to-use" latencies. How should I adjust the access latencies for SST. Do I need
+#subtract off cycles of overhead in the simulator?
+# TODO does ariel track dependencies between instructions?
+
+#TODO the indexing method is given for these caches on [mm.64-65]. Where do I use this?
+
 # [mm.12] Each L1I is 64KiB, 4-way associative
 l1_params = {
-    "coherence_protocol": coherence_protocol,
-    "cache_frequency": clock,      #TODO
-    "replacement_policy": "lru",   #TODO
-    "cache_size": "64KB",
-    "maxRequestDelay" : "1000000", #TODO
-    "associativity": 4,
-    "cache_line_size": 256,
-    "access_latency_cycles": 4,    #TODO
-    "L1": 1,
-    "debug": 0
+    "coherence_protocol"   : coherence_protocol,
+    "cache_frequency"      : clock,
+    "replacement_policy"   : "lru",   # assumed LRU based on sector cache description in [mm.78]
+    "cache_size"           : "64KiB",
+    "maxRequestDelay"      : "10000",   #Note - originally was 1000000ns
+    "associativity"        : 4,
+    "cache_line_size"      : 256,
+    "access_latency_cycles": 5,    # [mm.64] - 5 is minimum, longer for sve
+    "L1"                   : 1,
+    "debug"                : 0
 }
 
 # [mm.12] Each L2 (one per CMG) is 8MiB, 16-way associative
 l2_params = {
-    "coherence_protocol": coherence_protocol,
-    "cache_frequency": clock,
-    "replacement_policy": "lru",   #TODO
-    "cache_size": "8MB",
-    "associativity": 16,
-    "cache_line_size": 256,
-    "access_latency_cycles": 8,    #TODO
-    "mshr_num_entries" : 16,       #TODO
-    "mshr_latency_cycles" : 2,     #TODO
+    "coherence_protocol"   : coherence_protocol,
+    "cache_frequency"      : clock,
+    "replacement_policy"   : "lru",  # assumed LRU - see l1_params
+    "cache_size"           : "8MiB",
+    "associativity"        : 16,
+    "cache_line_size"      : 256,
+    "access_latency_cycles": 37,     # [mm.65] - 37 minimum, 47 max
+    "mshr_num_entries"     : 256,    # [mm.66] - size of MIB
+    "mshr_latency_cycles"  : 2,      # Note - unspecified, leaving as is
     "debug": 0,
 }
 
-# TODO: Remove references to l3
-#l3_params = {
-#    "debug" : "0",
-#    "access_latency_cycles" : "6",
-#    "cache_frequency" : "2GHz",
-#    "replacement_policy" : "lru",
-#    "coherence_protocol" : coherence_protocol,
-#    "associativity" : "4",
-#    "cache_line_size" : "64",
-#    "debug_level" : "10",
-#    "cache_size" : "128 KB",
-#    "mshr_num_entries" : "4096",
-#    "mshr_latency_cycles" : 2,
-#    "num_cache_slices" : str(groups * l3cache_blocks_per_group),
-#    "slice_allocation_policy" : "rr"
-#}
-
 memctrl_params = {
-    "backing" : "none",
-    "clock" : memory_clock,
-}
-memory_params = {
-    "access_time" : "30ns",
-    "mem_size" : str(memory_capacity // (groups * memory_controllers_per_group)) + "MiB",
+    "backing": "none",       # we do not require correct memory values
+    "clock"  : memory_clock, # TODO
 }
 
 dramsim3_params = {
-    "access_time" : "1000ns", #TODO
     "config_ini"  : "../../DRAMsim3/configs/HBM2_8Gb_x128.in",
-    "mem_size"    : "8GiB",   #TODO
+    "mem_size"    : "8GiB"
 }
 
+##########################
+#TODO - everything below #
+##########################
 dc_params = {
     "coherence_protocol": coherence_protocol,
     "memNIC.network_bw": memory_network_bandwidth,
@@ -139,10 +126,10 @@ dc_params = {
     "debug": 1,
 }
 
-print("Configuring Ariel processor model (" + str(groups * cores_per_group) + " cores)...")
+print("Configuring Ariel processor model (" + str(groups)" CMGs with "str(cores_per_group) + " cores each)...")
 
 ariel = sst.Component("A0", "ariel.ariel")
-ariel.addParams({
+ariel.addParams({ #TODO
     "verbose"             : "0",
     "maxcorequeue"        : "256",
     "maxtranscore"        : "16",
@@ -165,8 +152,21 @@ memmgr.addParams({
 
 router_map = {}
 
+# Some Notes From [mm.63]
+# - The L2 caches are interconnected by two-way ring bus
+# - The L2 caches are inclusive
+# - Each L1I contains a MIB (Move In Buffer) to manage in-flight rquests to the MAC
+# - Each L1D contains an MIB and a MOB (Move Out Buffer) as well. These structures asynchrnously manage requests
+# - [mm.64] Top of the page contains throughputs for all of these buffers in bytes/cycle
+# - MIB/MOB defined in 9.4
+
 print("Configuring ring network...")
 
+# Loop over each core and eacjh l3 cache block. Each one gets a ring stop, which is a merlin.hr_router
+# Each one gets added to the 
+
+# Create a merlin.hr_router for each core, for each cache block, and for each memory controller
+# add each to the router_map
 for next_ring_stop in range((cores_per_group + memory_controllers_per_group + l3cache_blocks_per_group) * groups):
     ring_rtr = sst.Component("rtr." + str(next_ring_stop), "merlin.hr_router")
     ring_rtr.addParams(ringstop_params)
@@ -177,6 +177,7 @@ for next_ring_stop in range((cores_per_group + memory_controllers_per_group + l3
     topo.addParams(topology_params)
     router_map["rtr." + str(next_ring_stop)] = ring_rtr
 
+# Create the ring topology by connecting each ring_stop with the next
 for next_ring_stop in range((cores_per_group + memory_controllers_per_group + l3cache_blocks_per_group) * groups):
     if next_ring_stop == ((cores_per_group + memory_controllers_per_group + l3cache_blocks_per_group) * groups) - 1:
         rtr_link = sst.Link("rtr_" + str(next_ring_stop))
@@ -185,9 +186,15 @@ for next_ring_stop in range((cores_per_group + memory_controllers_per_group + l3
         rtr_link = sst.Link("rtr_" + str(next_ring_stop))
         rtr_link.connect( (router_map["rtr." + str(next_ring_stop)], "port0", ring_latency), (router_map["rtr." + str(next_ring_stop+1)], "port1", ring_latency) )
 
+
+# Loop over each group
 for next_group in range(groups):
     print("Configuring core and memory controller group " + str(next_group) + "...")
 
+#For each core in a group
+#   Give each its own L1 and L2
+#   Link the ariel core with the L1, and link the L1 with the L2
+#   Link the L2 with the ring
     for next_active_core in range(active_cores_per_group):
         print("Creating active core " + str(next_active_core) + " in group " + str(next_group))
 
@@ -197,7 +204,7 @@ for next_group in range(groups):
 
         l2 = sst.Component("l2cache_" + str(next_core_id), "memHierarchy.Cache")
         l2.addParams(l2_params)
-        l2.addParams(l1_prefetch_params)
+        l2.addParams(l2_prefetch_params)
 
         ariel_cache_link = sst.Link("ariel_cache_link_" + str(next_core_id))
         ariel_cache_link.connect( (ariel, "cache_link_" + str(next_core_id), ring_latency), (l1, "high_network_0", ring_latency) )
@@ -211,6 +218,7 @@ for next_group in range(groups):
         next_network_id = next_network_id + 1
         next_core_id = next_core_id + 1
 
+# Do exactly the same as the preious loop but for inactive cores
     for next_inactive_core in range(cores_per_group - active_cores_per_group):
         print("Creating inactive core: " + str(next_inactive_core) + " in group " + str(next_group))
 
@@ -234,6 +242,9 @@ for next_group in range(groups):
         next_network_id = next_network_id + 1
         next_core_id = next_core_id + 1
 
+# For each L3 cache block in the group,
+#   Create a memHierarchy.Cache object
+#   Connect it to the ring
     for next_l3_cache_block in range(l3cache_blocks_per_group):
         print("Creating L3 cache block: " + str(next_l3_cache_block) + " in group: " + str(next_group))
 
@@ -249,6 +260,13 @@ for next_group in range(groups):
 
         next_network_id = next_network_id + 1
 
+# For each mem controler in the group
+#   Compute local size as the total capacity divided by the number of groups times the number of controllers in a group
+#   TODO: this means I need to adjust the memory_capacity above be the capacity of the whole system, not a single CMG?
+#   Add a dramsim3 module as the backend for each memory controller
+#   set a mH.DirectoryController for each and give it a range of addresses to watch for
+#   link the directory controller with the memory controller
+#   link the directory controller with a ringstop
     for next_mem_ctrl in range(memory_controllers_per_group):
         local_size = memory_capacity // (groups * memory_controllers_per_group)
 
