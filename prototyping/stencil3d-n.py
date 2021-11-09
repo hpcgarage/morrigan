@@ -3,7 +3,7 @@ import sys
 import params
 from morriganutils import mk, mklink, anon
 
-ncpu = 6
+ncpu = 12
 
 # Define SST core options
 sst.setProgramOption("timebase", "1ps")
