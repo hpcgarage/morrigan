@@ -80,14 +80,14 @@ class CMG:
                (net,    "local0",   default))
 
         # Make Directory, link to network
-        dc     = mk(anon("memHierarchy.DirectoryController"), params.dc)
+        dc     = mk(anon("memHierarchy.DirectoryController"), params.dc[group_id])
         dcnic  = mk(dc.setSubComponent("cpulink", "memHerarchy.MemNIC"), params.dcnic)
         dclink = mk(dcnic.setSubComponent("linkcontrol", "kingsley.linkcontrol"), params.linkcontrol)
         mklink((net,    "local1",   default),
                (dclink, "rtr_port", default))
 
         # Memory controller, linked to dc
-        memctrl = mk(anon("memHierarchy.MemController"), params.memctrl)
+        memctrl = mk(anon("memHierarchy.MemController"), params.memctrl[group_id])
         memory  = mk(memctrl.setSubComponent("backend", "memHierarchy.dramsim3"), params.dramsim3)
         mklink((dc,      "memory",      default),
                (memctrl, "direct_link", default))
@@ -118,7 +118,7 @@ grid_shape = shape(ngroup)
 grid = {}
 for row in range(len(grid_shape)):
     for col in range(row):
-        grid[(row, col)] = mk(anon("kingsley.noc_mesh"), params.grid)
+        grid[(row, col)] = mk(anon("kingsley.noc_mesh"), params.noc)
         CMG(row*grid_shape[0]+col, grid[(row, col)])
         if (row != 0):
             mklink((grid[(row  , col)], "north", default),
