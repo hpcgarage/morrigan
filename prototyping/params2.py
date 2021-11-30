@@ -60,13 +60,13 @@ class Param:
 
         self.ariel   = {
             "verbose"        : 0,
-            "corecount"      : ncpu,
+            "corecount"      : ncpu*ngroup,
             "cachelinesize"  : 256,
             "executable"     : exe,
             "appargcount"    : len(args),
             "envparamcount"  : 1,
             "envparamname0"  : "OMP_NUM_THREADS",
-            "envparamval0"   : str(ncpu),
+            "envparamval0"   : str(ncpu*ngroup),
             "clock"          : "2.0GHz",
             "arielmode"      : 0,
         }
