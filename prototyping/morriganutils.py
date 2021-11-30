@@ -16,16 +16,16 @@ component_count = {}
 #    nx.draw(graph, ax=f.add_subplot(111))
 #    f.savefig(filename)
 
-def anon(component):
-    if component in component_count:
-        num = component_count[component]
-        component_count[component] = num + 1
-    else:
-        num = 0
-        component_count[component] = 1
-
-    name = "anon_" + component + "_" + str(num)
-    return sst.Component(name, component)
+#def anon(component):
+#    if component in component_count:
+#        num = component_count[component]
+#        component_count[component] = num + 1
+#    else:
+#        num = 0
+#        component_count[component] = 1
+#
+#    name = "anon_" + component + "_" + str(num)
+#    return sst.Component(name, component)
 
 def mk(comp, params):
       comp.addParams(params)
@@ -34,8 +34,8 @@ def mk(comp, params):
 def mklink(e1, e2):
       link = sst.Link("link_" + e1[0].getFullName() + "[" + e1[1] + "]" + "_" +
                                 e2[0].getFullName() + "[" + e2[1] + "]" )
-      print("link_" + e1[0].getFullName() + "[" + e1[1] + "]" + "_" +
-                                e2[0].getFullName() + "[" + e2[1] + "]")
+      #print("link_" + e1[0].getFullName() + "[" + e1[1] + "]" + "_" +
+      #                          e2[0].getFullName() + "[" + e2[1] + "]")
       link.connect(e1, e2)
 
 #      if (build):

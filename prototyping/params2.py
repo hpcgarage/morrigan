@@ -13,14 +13,14 @@ class DCParam:
         self.capacity = ngroup * mem_per_group
 
     def __getitem__(self, idx):
-        if (idx < 0 or idx > ngroup-1):
+        if (idx < 0 or idx > self.ngroup-1):
             raise IndexError("Index out of range: {}".format(idx))
         return {
             # Per-Group Params
-            "addr_range_start" : idx*interleave_size,
+            "addr_range_start" : idx*self.interleave_size,
             "addr_range_end"   : self.capacity - (self.ngroup-idx-1)*self.interleave_size - 1,
-            "interleave_size"  : self.interleave_size,
-            "interleave_step"  : self.ngroup * self.interleave_size,
+            "interleave_size"  : str(self.interleave_size) + "B",
+            "interleave_step"  : str(self.ngroup * self.interleave_size) + "B",
             # Global Params
             #TODO what is the entry cache? Different from mshr?
             "clock"                  : freq,
@@ -39,24 +39,40 @@ class MemCtrlParam:
         self.capacity = ngroup * mem_per_group
 
     def __getitem__(self, idx):
-        if (idx < 0 or idx > ngroup-1):
+        if (idx < 0 or idx > self.ngroup-1):
             raise IndexError("Index out of range: {}".format(idx))
         return {
             # Per-Group Params
-            "addr_range_start" : idx*interleave_size,
+            "addr_range_start" : idx*self.interleave_size,
             "addr_range_end"   : self.capacity - (self.ngroup-idx-1)*self.interleave_size - 1,
-            "interleave_size"  : self.interleave_size,
-            "interleave_step"  : self.ngroup * self.interleave_size,
+            "interleave_size"  : str(self.interleave_size) + "B",
+            "interleave_step"  : str(self.ngroup * self.interleave_size) + "B",
             # Global Params
             "clock"   : freq, #TODO: what freq to use?
             "backing" : "none",
         }
 
 class Param:
-    def __init__(self, ngroup):
+    def __init__(self, ncpu, ngroup, exe, args):
         self.ngroup  = ngroup
         self.dc      = DCParam(ngroup)
         self.memctrl = MemCtrlParam(ngroup)
+
+        self.ariel   = {
+            "verbose"        : 0,
+            "corecount"      : ncpu,
+            "cachelinesize"  : 256,
+            "executable"     : exe,
+            "appargcount"    : len(args),
+            "envparamcount"  : 1,
+            "envparamname0"  : "OMP_NUM_THREADS",
+            "envparamval0"   : str(ncpu),
+            "clock"          : "2.0GHz",
+            "arielmode"      : 0,
+        }
+
+        for i in range(len(args)):
+            self.ariel["apparg" + str(i)] = args[i]
 
         self.l1 = {
             "access_latency_cycles" : "2",
@@ -100,9 +116,6 @@ class Param:
             #nothing
         }
 
-        self.linkcontrol = {
-
-        }
 
         self.mesh_flit           = 36
         self.mesh_link_latency   = "100ps"
@@ -115,6 +128,12 @@ class Param:
                 "input_buf_size" : self.network_buffers,
                 "port_priority_equal" : 1,
         }
+
+        self.linkcontrol = {
+            "link_bw"      : self.mesh_link_bw,
+            "in_buf_size"  : self.network_buffers,
+            "out_buf_size" : self.network_buffers,
+        }
         #TODO figure out groups. Will the mem controllers send to
         #each other? The DC will, I think.
 
@@ -126,8 +145,8 @@ class Param:
 
         self.l2nic = {
             "group":"1",
-            "sources":"1",
-            "dest":"0"
+            "sources":"0,1",
+            "dest":"0,1"
         }
 
 
