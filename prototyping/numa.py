@@ -1,15 +1,17 @@
 import sst
 import sys
 import os
-import params
+import params2
 from morriganutils import mk, mklink, anon
 from math import floor, sqrt
 
 try:
     ncpu = int(os.environ["OMP_NUM_THREADS"])
 except KeyError:
-    print("Error: OMP_NUM_THREADS not set. Aborting.")
-    sys.exit(1)
+    print("Warning: OMP_NUM_THREADS not set. Defaulting to 4 threads.")
+    ncpu = 4
+    #print("Error: OMP_NUM_THREADS not set. Aborting.")
+    #sys.exit(1)
 
 print("ncpu: " + str(ncpu))
 
@@ -29,11 +31,13 @@ ariel_params = {
     "arielmode"      : 0,
 }
 
-ngroup = 2
+ngroup = 1
 
 if (ncpu % ngroup != 0):
     print("Error: ngroup does not divide ncpu")
     sys.exit(1)
+
+cores_per_group = ncpu // ngroup
 
 for i in range(len(args)):
     ariel_params["apparg" + str(i)] = args[i]
@@ -49,10 +53,6 @@ bus_params = {
     "bus_frequency" : "2.0GHz",
 }
 
-#TODO figure out groups. Will the mem controllers send to each other? The DC will, I think.
-params.dcnic = {"group":"0", "sources":"0,1", "dest":"0,1"}
-params.l2nic = {"group":"1", "sources":"1", "dest":"0"}
-# bus, memlink, linkcontrol, dramsim3, grid, dcnic, l2nic
 
 class CMG:
     def __init__(self, group_id, net):
@@ -62,10 +62,10 @@ class CMG:
         # Make L1s, connect to bus
         for i in range(cores_per_group):
             l1 = mk(anon("memHierarchy.Cache"), params.l1)
-            mklink((ariel, "cahce_link_"+str(group_id*cores_per_group+i), default),
+            mklink((ariel, "cache_link_"+str(group_id*cores_per_group+i), default),
                    (l1,    "high_network_0", default)).setNoCut()
             mklink((l1,    "low_network_0", default),
-                   (bus,   "high_network_0", default))
+                   (bus,   "high_network_"+str(i), default))
 
         # Make L2, attach to the bus to the l1
         l2        = mk(anon("memHierarchy.Cache"), params.l2)
@@ -81,8 +81,18 @@ class CMG:
 
         # Make Directory, link to network
         dc     = mk(anon("memHierarchy.DirectoryController"), params.dc[group_id])
-        dcnic  = mk(dc.setSubComponent("cpulink", "memHerarchy.MemNIC"), params.dcnic)
+        dcnic  = mk(dc.setSubComponent("cpulink", "memHierarchy.MemNIC"), params.dcnic)
         dclink = mk(dcnic.setSubComponent("linkcontrol", "kingsley.linkcontrol"), params.linkcontrol)
+
+        #dc = sst.Component("dc"+str(group_id), "memHierarchy.DirectoryController")
+        #dcnic = dc.setSubComponent("cpulink", "memHierarchy.MemNIC")
+        #dclink = dcnic.setSubComponent("linkcontrol", "kingsley.linkcontrol")
+
+        #dc.addParams(params.dc[group_id])
+        #dcnic.addParams(params.dcnic)
+        #dclink.addParams(params.linkcontrol)
+        #dclink.addParams({"network_link_control" : "kingsley.linkcontrol"})
+
         mklink((net,    "local1",   default),
                (dclink, "rtr_port", default))
 
@@ -114,10 +124,12 @@ def shape(N):
 # As we do this row by row, we need only connect to
 # nodes above or to the left of the current one
 # And add compute to grid
+params = params2.Param(ngroup)
 grid_shape = shape(ngroup)
 grid = {}
 for row in range(len(grid_shape)):
-    for col in range(row):
+    for col in range(grid_shape[row]):
+        print("Creating noc ({},{})".format(row, col))
         grid[(row, col)] = mk(anon("kingsley.noc_mesh"), params.noc)
         CMG(row*grid_shape[0]+col, grid[(row, col)])
         if (row != 0):
@@ -131,6 +143,6 @@ for row in range(len(grid_shape)):
 sst.setProgramOption("timebase", "1ps")
 sst.setProgramOption("stopAtCycle", "0 ns")
 sst.setStatisticLoadLevel(1)
-sst.setStatisticOutput("sst.statOutputCSV", {"filepath" : "./ariel_mm_output_" + str(ncpu) + ".csv",
+sst.setStatisticOutput("sst.statOutputCSV", {"filepath" : "./numa_output_" + str(ncpu) + ".csv",
                                                  "separator" : ", " } )
 
