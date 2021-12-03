@@ -11,7 +11,7 @@ from math import floor, sqrt
 # memory controller. All of this will be attached to the network.
 # Right now, all the links have the same latency.
 class CMG:
-    def __init__(self, group_id, cores_per_group, net, latency):
+    def __init__(self, group_id, cores_per_group, net, latency, ariel):
         # Make L1-L2 bus
         bus = mk(sst.Component("L1L2Bus", "memHierarchy.Bus"), params.bus)
 
@@ -31,12 +31,17 @@ class CMG:
         l2        = mk(sst.Component("L2Cache","memHierarchy.Cache"), params.l2)
         l2cpulink = mk(l2.setSubComponent("cpulink", "memHierarchy.MemLink"), params.memlink)
 
+        print(params.memlink)
+
         mklink((bus,       "low_network_0", latency),
                (l2cpulink, "port", latency))
 
         # Attach L2 to network
+        #params.l2nic["accept_region"] = "true"
         l2nic  = mk(l2.setSubComponent("memlink", "memHierarchy.MemNIC"), params.l2nic)
         l2link = mk(l2nic.setSubComponent("linkcontrol", "kingsley.linkcontrol"), params.linkcontrol)
+
+        print(params.l2nic)
 
         mklink((l2link, "rtr_port", latency),
                (net,    "local0",   latency))
@@ -45,6 +50,7 @@ class CMG:
         dc     = mk(sst.Component("Directory","memHierarchy.DirectoryController"), params.dc[group_id])
         dcnic  = mk(dc.setSubComponent("cpulink", "memHierarchy.MemNIC"), params.dcnic)
         dclink = mk(dcnic.setSubComponent("linkcontrol", "kingsley.linkcontrol"), params.linkcontrol)
+        dc2mem = mk(dc.setSubComponent("memlink", "memHierarchy.MemLink"), params.memlink)
 
         mklink((net,    "local1",   latency),
                (dclink, "rtr_port", latency))
@@ -53,7 +59,9 @@ class CMG:
         memctrl = mk(sst.Component("MemoryController","memHierarchy.MemController"), params.memctrl[group_id])
         memory  = mk(memctrl.setSubComponent("backend", "memHierarchy.dramsim3"), params.dramsim3)
 
-        mklink((dc,      "memory",      latency),
+        print(params.memctrl[group_id])
+
+        mklink((dc2mem, "port",        latency),
                (memctrl, "direct_link", latency))
 
 # Returns a list of row lengths for the grid
@@ -76,15 +84,20 @@ def shape(N):
 # Parse arguments
 parser = argparse.ArgumentParser(description='Run a Fujitsu A64FX-like processor simulation',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-n', '--ncpu',   default='1', help='Number of cpus in each core group.', type=int)
-parser.add_argument('-g', '--ngroup', default='4', help='Number of core groups.', type=int)
-parser.add_argument('-e', '--exe',    default='./mml', help='Executable which will be traced by Ariel.')
-parser.add_argument('-a', '--args',   default='100', help='The arguments passed to the executable.')
+parser.add_argument('-n', '--ncpu',    default='1', help='Number of cpus in each core group.', type=int)
+parser.add_argument('-g', '--ngroup',  default='4', help='Number of core groups.', type=int)
+parser.add_argument('-e', '--exe',     default='./mml', help='Executable which will be traced by Ariel.')
+parser.add_argument('-a', '--args',    default='10', help='The arguments passed to the executable.')
+parser.add_argument('-v', '--verbose', default=0, action='store_const', help='Display configuration info.', const=1)
 config = parser.parse_args(sys.argv[1:])
 
 # TODO: Investigate if this is necessary (print out OMP_NUM_THREADS in the executable to see if ariel
 # sets it for us)
 os.environ["OMP_NUM_THREADS"] = str(config.ncpu * config.ngroup)
+
+# Display configuration
+if (config.verbose):
+    print('Running with configuration: {}'.format(vars(config)))
 
 # Static Parameters TODO - fix these up
 default_latency = "1000ps"
@@ -108,7 +121,7 @@ for row in range(len(grid_shape)):
         sst.pushNamePrefix("CMG{{{},{}}}".format(row,col))
 
         grid[(row, col)] = mk(sst.Component("Router","kingsley.noc_mesh"), params.noc)
-        CMG(row*grid_shape[0]+col, config.ncpu, grid[(row, col)], default_latency)
+        CMG(row*grid_shape[0]+col, config.ncpu, grid[(row, col)], default_latency, ariel)
 
         if (row != 0):
             mklink((grid[(row  , col)], "north", default_latency),
@@ -121,7 +134,10 @@ for row in range(len(grid_shape)):
 
 # Define SST core options
 sst.setProgramOption("timebase", "1ps")
-sst.setProgramOption("stopAtCycle", "0 ns")
-sst.setStatisticLoadLevel(1)
-sst.setStatisticOutput("sst.statOutputCSV", {"filepath" : "./numa_output_" + str(config.ngroup) + "x" + str(config.ncpu) + ".csv", "separator" : ", " } )
+#sst.setProgramOption("stopAtCycle", "0 ns")
+sst.setStatisticLoadLevel(9)
+sst.enableAllStatisticsForAllComponents()
+outfile = "./numa_output_" + str(config.ngroup) + "x" + str(config.ncpu) + ".csv"
+print("Writng to " + outfile)
+sst.setStatisticOutput("sst.statOutputCSV", {"filepath" : outfile, "separator" : ", " } )
 

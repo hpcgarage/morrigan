@@ -8,7 +8,6 @@ replacement      = "lru"
 class DCParam:
     def __init__(self, ngroup, mem_per_group=1*1024*1024*1024, interleave_size=4*1024):
         self.ngroup = ngroup
-        self.mem_per_group = mem_per_group
         self.interleave_size = interleave_size
         self.capacity = ngroup * mem_per_group
 
@@ -34,7 +33,6 @@ class DCParam:
 class MemCtrlParam:
     def __init__(self, ngroup, mem_per_group=1*1024*1024*1024, interleave_size=4*1024):
         self.ngroup = ngroup
-        self.mem_per_group = mem_per_group
         self.interleave_size = interleave_size
         self.capacity = ngroup * mem_per_group
 
@@ -42,9 +40,12 @@ class MemCtrlParam:
         if (idx < 0 or idx > self.ngroup-1):
             raise IndexError("Index out of range: {}".format(idx))
         return {
+            #TODO the Memory Controller is connected to a directory, not the network. Do we
+            # need t specify these?
             # Per-Group Params
             "addr_range_start" : idx*self.interleave_size,
             "addr_range_end"   : self.capacity - (self.ngroup-idx-1)*self.interleave_size - 1,
+            #"addr_range_end"   : self.capacity - (self.ngroup-idx-1)*self.interleave_size - 1,
             "interleave_size"  : str(self.interleave_size) + "B",
             "interleave_step"  : str(self.ngroup * self.interleave_size) + "B",
             # Global Params
@@ -54,20 +55,19 @@ class MemCtrlParam:
 
 class Param:
     def __init__(self, ncpu, ngroup, exe, args):
-        self.ngroup  = ngroup
         self.dc      = DCParam(ngroup)
         self.memctrl = MemCtrlParam(ngroup)
 
         self.ariel   = {
             "verbose"        : 0,
             "corecount"      : ncpu*ngroup,
-            "cachelinesize"  : 256,
+            "cachelinesize"  : cache_line_bytes,
             "executable"     : exe,
             "appargcount"    : len(args),
             "envparamcount"  : 1,
             "envparamname0"  : "OMP_NUM_THREADS",
             "envparamval0"   : str(ncpu*ngroup),
-            "clock"          : "2.0GHz",
+            "clock"          : freq,
             "arielmode"      : 0,
         }
 
@@ -75,16 +75,16 @@ class Param:
             self.ariel["apparg" + str(i)] = args[i]
 
         self.l1 = {
-            "access_latency_cycles" : "2",
             "cache_frequency"       : freq,
-            "replacement_policy"    : replacement,
-            "coherence_protocol"    : coherence,
+            "cache_size"            : "4KiB",
             "associativity"         : "4",
-            "cache_line_size"       : cache_line_bytes,
-            "prefetcher"            : "cassini.StridePrefetcher",
-            "debug"                 : "0",
+            "access_latency_cycles" : "2",
             "L1"                    : "1",
-            "cache_size"            : "1KiB",
+            "cache_line_size"       : cache_line_bytes,
+            "coherence_protocol"    : coherence,
+            "replacement_policy"    : replacement,
+            #"prefetcher"            : "cassini.StridePrefetcher",
+            "debug"                 : "0",
         }
 
         self.l2 = {
@@ -92,12 +92,12 @@ class Param:
             "cache_frequency"       : freq,
             "replacement_policy"    : replacement,
             "coherence_protocol"    : coherence,
-            "associativity"         : "8",
+            "associativity"         : "4",
             "cache_line_size"       : cache_line_bytes,
             "prefetcher"            : "cassini.StridePrefetcher",
             "debug"                 : "0",
             "L1"                    : "0",
-            "cache_size"            : "2KiB",
+            "cache_size"            : "1MiB",
             "mshr_latency_cycles"   : "5",
         }
 
@@ -113,6 +113,7 @@ class Param:
         # TODO: Do I need to set the accept_region? Not on the l1l2 link, right?
         # TODO: Do I even need a memlink there?
         self.memlink = {
+            #"accept_region" : 'false'
             #nothing
         }
 
@@ -127,6 +128,7 @@ class Param:
                 "flit_size" : str(self.mesh_flit) + "B",
                 "input_buf_size" : self.network_buffers,
                 "port_priority_equal" : 1,
+                "local_ports" : 2,
         }
 
         self.linkcontrol = {
@@ -137,17 +139,20 @@ class Param:
         #TODO figure out groups. Will the mem controllers send to
         #each other? The DC will, I think.
 
-        self.dcnic = {
-            "group":"0",
-            "sources":"0,1",
-            "dest":"0,1",
+        self.l2nic = {
+            "group":"2",
+            "sources":"1",
+            "destinations":"1",
+            #"accept_region" : 0,
         }
 
-        self.l2nic = {
+        self.dcnic = {
             "group":"1",
-            "sources":"0,1",
-            "dest":"0,1"
+            "sources":"2",
+            "destinations":"2",
+            "accept_region" : 0,
         }
+
 
 
 
