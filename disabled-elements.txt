@@ -1,16 +1,8 @@
 CramSim
-ember
-firefly
 GNA
-hermes
-kingsley
 Messier
-miranda
-Opal
 prospero
-Samba
 serrano
-shogun
 simpleElementExample
 simpleSimulation
 thornhill

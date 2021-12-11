@@ -1,7 +1,7 @@
 import sst
 import os
 
-groups          = 4   # Number of CMGs (core memory groups)
+groups          = 1   # Number of CMGs (core memory groups)
 cores_per_group = 12  # Compute cores per CMG
 
 clock         = "2GHz"   # Core clock
@@ -44,7 +44,7 @@ l2_params = {
     "detect_range"         : 1
 }
 
-ariel_params = { #TODO
+ariel_params = { # TODO
     "verbose"             : "0",
     "maxcorequeue"        : "256",
     "maxtranscore"        : "16",
@@ -101,7 +101,7 @@ memmgr.addParams(ariel_memmgr_params)
 
 # Functions to get the handles of the various created objects
 def l1name(core, group):
-    return "l1cache_c" + str(core_id) + "_g" + str(group)
+    return "l1cache_c" + str(core) + "_g" + str(group)
 
 def l2name(group):
     return "l2cache_g" + str(group)
@@ -112,7 +112,14 @@ def busname(group):
 def linkname(e1, e2):
     return "link_" + e1 + "_" + e2
 
+def corenum(core, group):
+    return group * cores_per_group + core
+
 l1_l2_latency = "1000ps"
+
+
+def mklink():
+    link = sst.Link
 
 
 # Build each group from the bottom up
@@ -125,7 +132,6 @@ for group in range(groups):
     dram.addParams(dramsim3_params)
 
     # Create a Director Controller to manage the L2?
-
 
     # Create an L2 for each group
     l2 = sst.Component(l2name(group), "memHierarchy.Cache")
@@ -146,6 +152,11 @@ for group in range(groups):
         # Create an L1D for each core
         l1 = sst.Component(l1name(core_id, group), "memHierarchy.Cache")
         l1.addParams(l1_params)
+
+        # Connect the core to the L1
+        ariel_cache_link = sst.Link("ariel_cache_link_" + str(corenum(core_id, group)))
+        ariel_cache_link.connect( (ariel, "cache_link_" + str(corenum), ring_latency), (l1, "high_network_0", ring_latency) )
+
 
         # Connect the L1 to the bus
         link = sst.Link(linkname(l1name(core_id, group), busname(group)))

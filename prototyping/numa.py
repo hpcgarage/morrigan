@@ -11,7 +11,7 @@ from math import floor, sqrt
 # memory controller. All of this will be attached to the network.
 # Right now, all the links have the same latency.
 class CMG:
-    def __init__(self, group_id, cores_per_group, net, latency, ariel):
+    def __init__(self, group_id, cores_per_group, net, latency, core_links):
         # Make L1-L2 bus
         bus = mk(sst.Component("L1L2Bus", "memHierarchy.Bus"), params.bus)
 
@@ -20,7 +20,7 @@ class CMG:
             sst.pushNamePrefix("Core"+str(i))
 
             l1 = mk(sst.Component("L1Cache", "memHierarchy.Cache"), params.l1)
-            mklink((ariel, "cache_link_"+str(group_id*cores_per_group+i), latency),
+            mklink(core_links[group_id*cores_per_group+i],
                    (l1,    "high_network_0", latency)).setNoCut()
             mklink((l1,    "low_network_0", latency),
                    (bus,   "high_network_"+str(i), latency))
@@ -31,7 +31,6 @@ class CMG:
         l2        = mk(sst.Component("L2Cache","memHierarchy.Cache"), params.l2)
         l2cpulink = mk(l2.setSubComponent("cpulink", "memHierarchy.MemLink"), params.memlink)
 
-        print(params.memlink)
 
         mklink((bus,       "low_network_0", latency),
                (l2cpulink, "port", latency))
@@ -41,7 +40,6 @@ class CMG:
         l2nic  = mk(l2.setSubComponent("memlink", "memHierarchy.MemNIC"), params.l2nic)
         l2link = mk(l2nic.setSubComponent("linkcontrol", "kingsley.linkcontrol"), params.linkcontrol)
 
-        print(params.l2nic)
 
         mklink((l2link, "rtr_port", latency),
                (net,    "local0",   latency))
@@ -59,7 +57,6 @@ class CMG:
         memctrl = mk(sst.Component("MemoryController","memHierarchy.MemController"), params.memctrl[group_id])
         memory  = mk(memctrl.setSubComponent("backend", "memHierarchy.dramsim3"), params.dramsim3)
 
-        print(params.memctrl[group_id])
 
         mklink((dc2mem, "port",        latency),
                (memctrl, "direct_link", latency))
@@ -84,11 +81,12 @@ def shape(N):
 # Parse arguments
 parser = argparse.ArgumentParser(description='Run a Fujitsu A64FX-like processor simulation',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-n', '--ncpu',    default='1', help='Number of cpus in each core group.', type=int)
-parser.add_argument('-g', '--ngroup',  default='4', help='Number of core groups.', type=int)
-parser.add_argument('-e', '--exe',     default='./mml', help='Executable which will be traced by Ariel.')
-parser.add_argument('-a', '--args',    default='10', help='The arguments passed to the executable.')
-parser.add_argument('-v', '--verbose', default=0, action='store_const', help='Display configuration info.', const=1)
+parser.add_argument('-n', '--ncpu',     default='1', help='Number of cpus in each core group.', type=int)
+parser.add_argument('-g', '--ngroup',   default='4', help='Number of core groups.', type=int)
+parser.add_argument('-e', '--exe',      default='./mml', help='Executable which will be traced by Ariel.')
+parser.add_argument('-a', '--args',     default='10', help='The arguments passed to the executable.')
+parser.add_argument('-v', '--verbose',  default=0, action='store_const', help='Display configuration info.', const=1)
+parser.add_argument('-w', '--workload', default='ariel', help='Which workload to run', type=str)
 config = parser.parse_args(sys.argv[1:])
 
 # TODO: Investigate if this is necessary (print out OMP_NUM_THREADS in the executable to see if ariel
@@ -109,7 +107,13 @@ params = params2.Param(config.ncpu, config.ngroup, config.exe, config.args)
 #################
 ## SIM WIRE UP ##
 #################
-ariel = mk(sst.Component("Ariel","ariel.ariel"), params.ariel)
+
+core_links = []
+if (config.workload=='ariel'):
+    ariel = mk(sst.Component("Ariel","ariel.ariel"), params.ariel)
+    for i in range(config.ncpu*config.ngroup):
+        core_links.append((ariel, "cache_link_"+str(i), default_latency))
+
 
 # Create the grid, row by row. Make the router, then pass it to
 # the CMG constructor so the compute and memory can be attached.
@@ -121,7 +125,7 @@ for row in range(len(grid_shape)):
         sst.pushNamePrefix("CMG{{{},{}}}".format(row,col))
 
         grid[(row, col)] = mk(sst.Component("Router","kingsley.noc_mesh"), params.noc)
-        CMG(row*grid_shape[0]+col, config.ncpu, grid[(row, col)], default_latency, ariel)
+        CMG(row*grid_shape[0]+col, config.ncpu, grid[(row, col)], default_latency, core_links)
 
         if (row != 0):
             mklink((grid[(row  , col)], "north", default_latency),

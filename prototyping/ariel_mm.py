@@ -13,7 +13,7 @@ except KeyError:
 print("ncpu: " + str(ncpu))
 
 exe = "./mml"
-args = "100".split(" ")
+args = "200".split(" ")
 
 ariel_params = {
     "verbose"        : 0,
