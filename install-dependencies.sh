@@ -83,11 +83,11 @@ mkdir -p $PREFIX/bin
 mkdir -p $PREFIX/share
 
 cd deps/cmake
-curl -L $CMAKEURL > cmake.tar.gz
+wget $CMAKEURL
 tar xzf *.tar.gz
 cd $(ls -d */)
-# cp bin/* $PREFIX/bin/
-# cp -r share/* $PREFIX/share/
+cp bin/* $PREFIX/bin/
+cp -r share/* $PREFIX/share/
 
 cd $MORRIGAN_HOME
 echo
@@ -98,7 +98,7 @@ sleep 1
 # Install Pin3
 mkdir -p $MORRIGAN_HOME/install/packages/pin
 cd $MORRIGAN_HOME/install/packages/pin
-curl -L $PINURL > pin3.tar.gz
+wget $PINURL
 tar xvzf *.tar.gz
 MORRIGAN_PIN_HOME=$PWD/$(ls -d */)
 
