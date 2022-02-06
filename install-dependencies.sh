@@ -28,8 +28,8 @@ AUTOCONF_VERSION=2.69
 AUTOMAKE_VERSION=1.16.2
 LIBTOOL_VERSION=2.4.6
 
-CMAKEURL='https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-macos-universal.tar.gz'
-PINURL='https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.20-98437-gf02b61307-clang-mac.tar.gz'
+CMAKEURL='https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-linux-x86_64.tar.gz'
+PINURL='https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.20-98437-gf02b61307-gcc-linux.tar.gz'
 
 
 #########################################################
@@ -46,10 +46,10 @@ mkdir -p $MORRIGAN_HOME/install
 
 cd deps
 
-curl -L http://ftp.gnu.org/gnu/m4/m4-${M4_VERSION}.tar.gz > m4-${M4_VERSION}.tar.gz
-curl -L http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VERSION}.tar.gz > autoconf-${AUTOCONF_VERSION}.tar.gz
-curl -L http://ftp.gnu.org/gnu/automake/automake-${AUTOMAKE_VERSION}.tar.gz > automake-${AUTOMAKE_VERSION}.tar.gz
-curl -L http://ftp.gnu.org/gnu/libtool/libtool-${LIBTOOL_VERSION}.tar.gz > libtool-${LIBTOOL_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/m4/m4-${M4_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/automake/automake-${AUTOMAKE_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/libtool/libtool-${LIBTOOL_VERSION}.tar.gz
 
 # Decompress
 gzip -dc m4-${M4_VERSION}.tar.gz | tar xvf -
