@@ -1,0 +1,12 @@
+# SPEC Benchmarks listed here will have sst configurations generated for them.
+
+# INT
+641.leela_s
+ 605.mcf_s
+ 623.xalancbmk_s
+
+# FP
+ 607.cactuBSSN_s
+ 621.wrf_s
+ 654.roms_s
+
