@@ -1,7 +1,12 @@
 #include <iostream>
 #include <string>
 
+void ariel_enable() {
+    printf("ARIEL-CLIENT: Library enabled.\n");
+}
+
 int main() {
+    ariel_enable();
     int sum = 0;
     for (std::string line; std::getline(std::cin, line);) {
         try {
@@ -11,6 +16,6 @@ int main() {
             // nothing
         }
     }
-    std::cout << sum << std::endl;
+    std::cout << "The sum is " << sum << std::endl;
     return 0;
 }

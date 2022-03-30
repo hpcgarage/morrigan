@@ -8,7 +8,9 @@ def mklink(e1, e2):
       link.connect(e1, e2)
       return link
 
-ariel_command = "ls -al"
+#ariel_command = "ls -al"
+#ariel_command = "./adder"
+ariel_command = "./adder < numbers.txt"
 
 # Components
 core    = sst.Component("Ariel", "ariel.ariel")
@@ -19,7 +21,7 @@ backend = memctrl.setSubComponent("backend", "memHierarchy.simpleMem")
 
 # Parameters
 freq="2GHz"
-core.addParams({"clock":freq})
+core.addParams({"clock":freq, "arielmode":0})
 core.addParams(parseAriel(ariel_command))
 gen.addParams({"request_count":20})
 l1.addParams({"l1":"true", "cache_frequency":freq, "cache_size":"1KiB", "associativity":4, "access_latency_cycles":2, "L1":"true"})
