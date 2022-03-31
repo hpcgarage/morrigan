@@ -17,8 +17,8 @@ def parseAriel (command):
     stdin   = None
     stdout  = None
     stderr  = None
-    stdoutappend = False
-    stderrappend = False
+    stdoutappend = 0
+    stderrappend = 0
 
     parts = bashlex.parse(command)
 
@@ -47,17 +47,17 @@ def parseAriel (command):
             elif (part.type == '>'):
                 if (not part.input or part.input == 1):
                     stdout = part.output.word
-                    appendstdout = False
+                    appendstdout = 0
                 elif (part.input == 2):
                     stderr = part.output.word
-                    appendstderr = False
+                    appendstderr = 0
             elif (part.type == '>>'):
                 if (not part.input or part.input == 1):
                     stdout = part.output.word
-                    appendstdout = True
+                    appendstdout = 1
                 elif (part.input == 2):
                     stderr = part.output.word
-                    appendstderr = True
+                    appendstderr = 1
 
         elif (part.kind == 'assignment'):
 
@@ -96,11 +96,11 @@ def parseAriel (command):
 
     if stdout:
         params['appstdout'] = stdout
-        params['appendstdout'] = appendstdout
+        params['appstdoutappend'] = appendstdout
 
     if stderr:
         params['appstderr'] = stderr
-        params['appendstderr'] = appendstderr
+        params['appstderrappend'] = appendstderr
 
     return params
 

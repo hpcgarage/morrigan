@@ -9,8 +9,8 @@ def mklink(e1, e2):
       return link
 
 #ariel_command = "ls -al"
-#ariel_command = "./adder"
-ariel_command = "./adder < numbers.txt > out.txt"
+#ariel_command = "./adder < numbers.txt 2>>err.txt"
+ariel_command = "MYENVVAR=20 ./adder < numbers.txt > out.txt 2>> err.txt"
 
 # Components
 core    = sst.Component("Ariel", "ariel.ariel")
