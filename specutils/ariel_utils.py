@@ -62,5 +62,8 @@ def parseAriel (command):
     if stdin:
         params['appstdin'] = stdin
 
+    if stdout:
+        params['appstdout'] = stdout
+
     return params
 
