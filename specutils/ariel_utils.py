@@ -10,12 +10,15 @@
 import bashlex
 def parseAriel (command):
 
-    cmd    = None
-    args   = []
-    stdin  = None
-    stdout = None
-    stderr = None
-    append = False
+    cmd     = None
+    args    = []
+    envname = []
+    envval  = []
+    stdin   = None
+    stdout  = None
+    stderr  = None
+    stdoutappend = False
+    stderrappend = False
 
     parts = bashlex.parse(command)
 
@@ -28,20 +31,42 @@ def parseAriel (command):
         raise ValueError('The command should not include multiple parts, such as with && or |')
 
     for part in ast.parts:
+
         if (part.kind == 'word'):
+
             if (cmd == None):
                 cmd = part.word
             else:
                 args.append(part.word)
+
         elif (part.kind == 'redirect'):
+
             if (part.type == '<'):
                 stdin = part.output.word
+
             elif (part.type == '>'):
-                stdout = part.output.word
-                redirect = False
+                if (not part.input or part.input == 1):
+                    stdout = part.output.word
+                    appendstdout = False
+                elif (part.input == 2):
+                    stderr = part.output.word
+                    appendstderr = False
             elif (part.type == '>>'):
-                stdout = part.output.word
-                append = True
+                if (not part.input or part.input == 1):
+                    stdout = part.output.word
+                    appendstdout = True
+                elif (part.input == 2):
+                    stderr = part.output.word
+                    appendstderr = True
+
+        elif (part.kind == 'assignment'):
+
+            split = part.word.split('=')
+            if (len(split) != 2):
+                raise ValueError('Excepted a length 2 array')
+            envname.append(split[0])
+            envval.append(split[1])
+
         else:
             start = part.pos[0]
             end = part.pos[1]
@@ -55,15 +80,27 @@ def parseAriel (command):
 
     params['executable'] = cmd
 
-    params['appargcount'] = len(args)
-    for i in range(len(args)):
-        params['apparg{}'.format(i)] = args[i]
+    if (len(args) > 0) :
+        params['appargcount'] = len(args)
+        for i in range(len(args)):
+            params['apparg{}'.format(i)] = args[i]
+
+    if (len(envname) > 0) :
+        params['envparamcount'] = len(envname)
+        for i in range(len(envname)):
+            params['envparamname{}'.format(i)] = envname[i]
+            params['envparamval{}'.format(i)] = envval[i]
 
     if stdin:
         params['appstdin'] = stdin
 
     if stdout:
         params['appstdout'] = stdout
+        params['appendstdout'] = appendstdout
+
+    if stderr:
+        params['appstderr'] = stderr
+        params['appendstderr'] = appendstderr
 
     return params
 
