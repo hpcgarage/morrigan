@@ -1,11 +1,29 @@
+# Author: Patrick Lavin
+#
 # This module will parse a command and output a dictionary
 # that can be provided to ariel to specify the command you want
 # to run. Specify any number of arguments and redirects.
+#
+# We do not attempt to support arbitrary bash commands. The goal is to
+# support basic commands to ease Ariel configuration.
+#
+# NOTE: While I/O redirection is not currently supported by Ariel, our hope is that it will be soon.
+# NOTE: bashlex is license under GPL v3.0
 
-# For now, we will focus on input redirect. Others many be added later
+# Examples:
+# parseAriel('./mycommand -n 20')
+#  -> {'executable': './mycommand', 'appargcount': 2, 'apparg0': '-n', 'apparg1': '20'}
+# parseAriel('./mycommand < infile.txt > outfile.txt 2>> errfile.txt')
+# -> {'executable': './mycommand', 'appstdin': 'infile.txt', 'appstdout': 'outfile.txt', 'appstdoutappend': 0, 'appstderr': 'errfile.txt', 'appstderrappend': 1}
+# parseAriel('MYENVVAR=20 ./mycommand')
+# -> {'executable': './mycommand', 'envparamcount': 1, 'envparamname0': 'MYENVVAR', 'envparamval0': '20'}
 
-# TODO: support standard file descriptors
-# TODO: support env params (assignment node)
+# Supported features:
+# - Parse command name and options
+# - Parse environment variables
+# - Redirect stdin from file
+# - Redirect stdout/stderr to file
+# - Choose overwrite or append for stdout/stderr redirection
 
 import bashlex
 def parseAriel (command):
@@ -32,6 +50,7 @@ def parseAriel (command):
 
     for part in ast.parts:
 
+        # The first word node is the command. Further words are arguments.
         if (part.kind == 'word'):
 
             if (cmd == None):
@@ -39,6 +58,7 @@ def parseAriel (command):
             else:
                 args.append(part.word)
 
+        # Redirect nodes represent I/O redirection operations.
         elif (part.kind == 'redirect'):
 
             if (part.type == '<'):
@@ -59,6 +79,8 @@ def parseAriel (command):
                     stderr = part.output.word
                     appendstderr = 1
 
+        # Assignment nodes are environment variables. They must appear at the beginning of a command
+        # If a node such as VAR=20 is parsed after a word, it will also be parsed as a word, not an assignment.
         elif (part.kind == 'assignment'):
 
             split = part.word.split('=')
@@ -67,6 +89,7 @@ def parseAriel (command):
             envname.append(split[0])
             envval.append(split[1])
 
+        # We don't support any other nodes.
         else:
             start = part.pos[0]
             end = part.pos[1]
@@ -75,6 +98,8 @@ def parseAriel (command):
 
     if (not cmd):
         raise ValueError('No command detected')
+
+    # Create the params struct used by Ariel.
 
     params = {}
 
