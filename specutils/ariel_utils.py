@@ -26,7 +26,7 @@
 # - Choose overwrite or append for stdout/stderr redirection
 
 import bashlex
-def parseAriel (command):
+def parseAriel (command, cmddir='./'):
 
     cmd     = None
     args    = []
@@ -37,6 +37,9 @@ def parseAriel (command):
     stderr  = None
     stdoutappend = 0
     stderrappend = 0
+
+    if (cmddir[-1] != '/'):
+        cmddir = cmddir + '/'
 
     parts = bashlex.parse(command)
 
@@ -54,7 +57,7 @@ def parseAriel (command):
         if (part.kind == 'word'):
 
             if (cmd == None):
-                cmd = part.word
+                cmd = cmddir + part.word
             else:
                 args.append(part.word)
 
@@ -62,7 +65,7 @@ def parseAriel (command):
         elif (part.kind == 'redirect'):
 
             if (part.type == '<'):
-                stdin = part.output.word
+                stdin = cmddir + part.output.word
 
             elif (part.type == '>'):
                 if (not part.input or part.input == 1):

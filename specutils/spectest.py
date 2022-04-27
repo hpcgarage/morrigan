@@ -14,7 +14,7 @@ ariel_command = "MYENVVAR=20 ./adder < numbers.txt > out.txt 2>> err.txt"
 
 # Components
 core    = sst.Component("Ariel", "ariel.ariel")
-gen     = core.setSubComponent("generator", "miranda.CopyGenerator")
+#gen     = core.setSubComponent("generator", "miranda.CopyGenerator")
 l1      = sst.Component("L1Cache", "memHierarchy.Cache")
 memctrl = sst.Component("MemoryController", "memHierarchy.MemController")
 backend = memctrl.setSubComponent("backend", "memHierarchy.simpleMem")
@@ -24,7 +24,7 @@ freq="2GHz"
 #################NOTE - Change arielmode to 1 for spec (unless you find a way to add the ariel_enable call)
 core.addParams({"clock":freq, "arielmode":0})
 core.addParams(parseAriel(ariel_command))
-gen.addParams({"request_count":20})
+#gen.addParams({"request_count":20})
 l1.addParams({"l1":"true", "cache_frequency":freq, "cache_size":"1KiB", "associativity":4, "access_latency_cycles":2, "L1":"true"})
 memctrl.addParams({"clock":freq, "backing":"none", "addr_range_end":1024**3-1})
 backend.addParams({"mem_size":"1GiB"})
