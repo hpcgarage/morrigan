@@ -1,6 +1,8 @@
 import sst
 from ariel_utils import parseAriel
 
+
+
 # Utility method
 def mklink(e1, e2):
       link = sst.Link("link_" + e1[0].getFullName() + "[" + e1[1] + "]" + "_" +
@@ -22,8 +24,10 @@ backend = memctrl.setSubComponent("backend", "memHierarchy.simpleMem")
 # Parameters
 freq="2GHz"
 #################NOTE - Change arielmode to 1 for spec (unless you find a way to add the ariel_enable call)
-core.addParams({"clock":freq, "arielmode":0})
-core.addParams(parseAriel(ariel_command))
+core.addParams({"clock":freq, "arielmode":1})
+#core.addParams(parseAriel(ariel_command))
+core.addParams({'executable': '/home/plavin3/spec/spec2017/benchspec/CPU/641.leela_s/run/run_base_test_mrgn-m64.0000/../run_base_test_mrgn-m64.0000/leela_s_base.mrgn-m64', 'appargcount': 1, 'apparg0': 'test.sgf', 'appstdout': 'test.out', 'appstdoutappend': 0, 'appstderr': 'test.err', 'appstderrappend': 1})
+
 #gen.addParams({"request_count":20})
 l1.addParams({"l1":"true", "cache_frequency":freq, "cache_size":"1KiB", "associativity":4, "access_latency_cycles":2, "L1":"true"})
 memctrl.addParams({"clock":freq, "backing":"none", "addr_range_end":1024**3-1})
