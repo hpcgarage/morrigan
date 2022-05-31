@@ -3,6 +3,11 @@
 # This file downloads and installs dependencies of the Morrigan project.
 # It is designed to be run from the top directory of the project.
 
+# If you got an error about verifying files, it probably means you don't
+# have the gnu gpg keys installed. If you'd like to do this, you can download
+# https://ftp.gnu.org/gnu/gnu-keyring.gpg and import it into your keyring with
+# `gpg --import gnu-keyring.gpg`
+
 set -euo pipefail
 
 MORRIGAN_HOME=$(pwd)
@@ -40,16 +45,53 @@ PINURL='https://software.intel.com/sites/landingpage/pintool/downloads/pin-3.20-
 mkdir -p $MORRIGAN_HOME/deps
 mkdir -p $MORRIGAN_HOME/install
 
+
 #####################
 # Install Autotools #
 #####################
 
 cd deps
 
+# Get GNU GPG Keys if the file is not found - we do not include it in our git repo
+
+# Download the specified versions, as well as the signatures
 wget http://ftp.gnu.org/gnu/m4/m4-${M4_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/m4/m4-${M4_VERSION}.tar.gz.sig
 wget http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/autoconf/autoconf-${AUTOCONF_VERSION}.tar.gz.sig
 wget http://ftp.gnu.org/gnu/automake/automake-${AUTOMAKE_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/automake/automake-${AUTOMAKE_VERSION}.tar.gz.sig
 wget http://ftp.gnu.org/gnu/libtool/libtool-${LIBTOOL_VERSION}.tar.gz
+wget http://ftp.gnu.org/gnu/libtool/libtool-${LIBTOOL_VERSION}.tar.gz.sig
+
+# Verify the downloaded files
+gpg --verify m4-${M4_VERSION}.tar.gz.sig
+if [ $? -ne 0 ];
+then
+    echo "Warning: Error verifying m4. See comment at top of this file for more info"
+    sleep 1
+fi
+
+gpg --verify autoconf-${AUTOCONF_VERSION}.tar.gz.sig
+if [ $? -ne 0 ];
+then
+    echo "Warning: Error verifying autoconf. See comment at top of this file for more info"
+    sleep 1
+fi
+
+gpg --verify automake-${AUTOMAKE_VERSION}.tar.gz.sig
+if [ $? -ne 0 ];
+then
+    echo "Warning: Error verifying automake. See comment at top of this file for more info"
+    sleep 1
+fi
+
+gpg --verify libtool-${LIBTOOL_VERSION}.tar.gz.sig
+if [ $? -ne 0 ];
+then
+    echo "Warning: Error verifying libtool. See comment at top of this file for more info"
+    sleep 1
+fi
 
 # Decompress
 gzip -dc m4-${M4_VERSION}.tar.gz | tar xvf -
