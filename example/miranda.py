@@ -25,7 +25,12 @@ core.addParams({
 gen = core.setSubComponent("generator", "miranda.SingleStreamGenerator")
 
 gen.addParams({
-    "arr_gap" : 50,
+    "arr_gap" : 20,
+    "stride"  : 2,
+    "reqSize" : 2,
+    "length" : 8,
+    "count" : 1000,
+    "startat" : 0,
 })
 
 
@@ -67,12 +72,12 @@ core_cache.connect( (core, "cache_link", "100ps"), (cache, "high_network_0", "10
 cache_mem.connect( (cache, "low_network_0", "100ps"), (memctrl, "direct_link", "100ps") )
 
 ################################ Stats ################################
-sst.setStatisticLoadLevel(2)
+sst.setStatisticLoadLevel(6)
 sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")
 sst.setStatisticOutputOptions( {
-    "filepath" : "./stats-miranda.csv",
+    "filepath" : "./statnowork-miranda.csv",
     "seperator" : ", "
 })
 

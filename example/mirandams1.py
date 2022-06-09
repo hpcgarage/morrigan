@@ -22,11 +22,11 @@ core.addParams({
     "clock" : "2.4GHz",
     "max_reqs_cycle" : 2,
 })
-gen = core.setSubComponent("generator", "miranda.SingleStreamGenerator")
+gen = core.setSubComponent("generator", "miranda.ReverseSingleStreamGenerator")
 
 gen.addParams({
-    "gapJump" : 32,
-    "gaplocations" : 4,
+    "gapJump" : 5,
+    "gapLocations" : 3,
 })
 
 
@@ -68,12 +68,12 @@ core_cache.connect( (core, "cache_link", "100ps"), (cache, "high_network_0", "10
 cache_mem.connect( (cache, "low_network_0", "100ps"), (memctrl, "direct_link", "100ps") )
 
 ################################ Stats ################################
-sst.setStatisticLoadLevel(2)
+sst.setStatisticLoadLevel(6)
 sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")
 sst.setStatisticOutputOptions( {
-    "filepath" : "./stats-miranda.csv",
+    "filepath" : "./statstest-miranda.csv",
     "seperator" : ", "
 })
 
