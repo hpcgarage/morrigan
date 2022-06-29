@@ -25,10 +25,10 @@ core.addParams({
 gen = core.setSubComponent("generator", "miranda.SingleStreamGenerator")
 
 gen.addParams({
-    "arr_gap" : 20,
-    "stride"  : 2,
-    "reqSize" : 2,
-    "length" : 8,
+    "arr_gap" : 3,
+    "stride"  : 8,
+    "reqSize" : 8,
+    "length" : 4,
     "count" : 1000,
     "startat" : 0,
 })
@@ -44,6 +44,9 @@ cache.addParams({
     "replacement_policy" : "lru",
     "coherence_policy" : "MESI",
     "cache_line_size" : 64,
+    "prefetcher": "cassini.StridePrefetcher",
+    "reach": 16,
+    "detect_range": 1
 })
 
 # Memory: 50ns access, 1GB
@@ -80,5 +83,4 @@ sst.setStatisticOutputOptions( {
     "filepath" : "./statnowork-miranda.csv",
     "seperator" : ", "
 })
-
 ################################ The End ################################
