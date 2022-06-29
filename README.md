@@ -11,9 +11,15 @@ cd morrigan
 git submodule update --init --recursive
 ```
 
+Next, add the GNU public keys to gpg (or, alternatively, comment out the lines starting with `gpg` in install-dependencies*.sh, if you want to skip verifying the downloads).
+```
+wget https://ftp.gnu.org/gnu/gnu-keyring.gpg
+gpg --install gnu-keyring.gpg
+``
+
 For Linux do the following steps.
 ```
-./install-dependencies.sh
+./install-dependencies-linux.sh
 ./configure-morrigan.sh
 ./build-and-install-morrigan.sh
 source morrigan-env.sh
