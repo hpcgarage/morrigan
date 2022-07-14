@@ -25,10 +25,17 @@ core.addParams({
 gen = core.setSubComponent("generator", "miranda.SingleStreamGenerator")
 
 gen.addParams({
+<<<<<<< HEAD
     "arr_gap" : 16,
     "stride"  : 2,
     "reqSize" : 8,
     "length" : 8,
+=======
+    "arr_gap" : 3,
+    "stride"  : 8,
+    "reqSize" : 8,
+    "length" : 4,
+>>>>>>> origin/Miranda
     "count" : 1000,
     "startat" : 0,
 })
@@ -75,7 +82,11 @@ core_cache.connect( (core, "cache_link", "100ps"), (cache, "high_network_0", "10
 cache_mem.connect( (cache, "low_network_0", "100ps"), (memctrl, "direct_link", "100ps") )
 
 ################################ Stats ################################
+<<<<<<< HEAD
 sst.setStatisticLoadLevel(3)
+=======
+sst.setStatisticLoadLevel(6)
+>>>>>>> origin/Miranda
 sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")

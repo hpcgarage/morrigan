@@ -25,6 +25,7 @@ core.addParams({
 gen = core.setSubComponent("generator", "miranda.ReverseSingleStreamGenerator")
 
 gen.addParams({
+<<<<<<< HEAD
     "arrGap" : 16,
     "stride"  : 2,
     "reqSize" : 8,
@@ -33,6 +34,10 @@ gen.addParams({
     "startat" : 0,
     "gapLocations" : 0,
     "gapJump" : 12,
+=======
+    "gapJump" : 5,
+    "gapLocations" : 3,
+>>>>>>> origin/Miranda
 })
 
 
@@ -46,9 +51,12 @@ cache.addParams({
     "replacement_policy" : "lru",
     "coherence_policy" : "MESI",
     "cache_line_size" : 64,
+<<<<<<< HEAD
     "prefetcher": "cassini.StridePrefetcher",
     "reach": 16,
     "detect_range": 1
+=======
+>>>>>>> origin/Miranda
 })
 
 # Memory: 50ns access, 1GB
@@ -82,7 +90,14 @@ sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")
 sst.setStatisticOutputOptions( {
+<<<<<<< HEAD
     "filepath" : "./statms1-miranda.csv",
     "seperator" : ", "
 })
+=======
+    "filepath" : "./statstest-miranda.csv",
+    "seperator" : ", "
+})
+
+>>>>>>> origin/Miranda
 ################################ The End ################################
