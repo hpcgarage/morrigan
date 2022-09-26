@@ -26,11 +26,11 @@ core.addParams({
 gen = core.setSubComponent("generator", "miranda.RandomGenerator")
 
 gen.addParams({
-    "verbose" : 1,
-    "patternType" : 13,
+    "verbose" : 4,
+    "patternType" : 34,  #1-34
     "reqSize" : 8,
 })
-
+# to do: add the filepath as a parameter passed in through this configuration file
 
 # Cache: L1, 2.4GHz, 2KB, 4-way set associative, 64B lines, LRU replacement, MESI coherence
 cache.addParams({
@@ -73,12 +73,12 @@ core_cache.connect( (core, "cache_link", "100ps"), (cache, "high_network_0", "10
 cache_mem.connect( (cache, "low_network_0", "100ps"), (memctrl, "direct_link", "100ps") )
 
 ################################ Stats ################################
-sst.setStatisticLoadLevel(7)
+sst.setStatisticLoadLevel(4)
 sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")
 sst.setStatisticOutputOptions( {
-    "filepath" : "./statspat-miranda.csv",
+    "filepath" : "./spatter34.csv",
     "seperator" : ", "
 })
 ################################ The End ################################
