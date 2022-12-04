@@ -25,8 +25,8 @@ core.addParams({
 gen = core.setSubComponent("generator", "miranda.SingleStreamGenerator")
 
 gen.addParams({
-    "arr_gap" : 16,
-    "stride"  : 2,
+    "arr_gap" : 8,
+    "stride"  : 1,
     "reqSize" : 8,
     "length" : 8,
     "count" : 1000,
@@ -80,7 +80,7 @@ sst.enableAllStatisticsForAllComponents({"type":"sst.AccumulatorStatistic"})
 
 sst.setStatisticOutput("sst.statOutputCSV")
 sst.setStatisticOutputOptions( {
-    "filepath" : "./statnowork-miranda.csv",
+    "filepath" : "./uniform-miranda.csv",
     "seperator" : ", "
 })
 ################################ The End ################################
