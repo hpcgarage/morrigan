@@ -54,6 +54,8 @@ cd deps
 
 # Get GNU GPG Keys if the file is not found - we do not include it in our git repo
 
+
+
 # Download the specified versions, as well as the signatures
 wget http://ftp.gnu.org/gnu/m4/m4-${M4_VERSION}.tar.gz
 wget http://ftp.gnu.org/gnu/m4/m4-${M4_VERSION}.tar.gz.sig
@@ -65,33 +67,33 @@ wget http://ftp.gnu.org/gnu/libtool/libtool-${LIBTOOL_VERSION}.tar.gz
 wget http://ftp.gnu.org/gnu/libtool/libtool-${LIBTOOL_VERSION}.tar.gz.sig
 
 # Verify the downloaded files
-gpg --verify m4-${M4_VERSION}.tar.gz.sig
-if [ $? -ne 0 ];
-then
-    echo "Warning: Error verifying m4. See comment at top of this file for more info"
-    sleep 1
-fi
+#gpg --verify m4-${M4_VERSION}.tar.gz.sig
+#if [ $? -ne 0 ];
+#then
+ #   echo "Warning: Error verifying m4. See comment at top of this file for more info"
+  #  sleep 1
+#fi
 
-gpg --verify autoconf-${AUTOCONF_VERSION}.tar.gz.sig
-if [ $? -ne 0 ];
-then
-    echo "Warning: Error verifying autoconf. See comment at top of this file for more info"
-    sleep 1
-fi
+#gpg --verify autoconf-${AUTOCONF_VERSION}.tar.gz.sig
+#if [ $? -ne 0 ];
+#then
+ #   echo "Warning: Error verifying autoconf. See comment at top of this file for more info"
+  #  sleep 1
+#fi
 
-gpg --verify automake-${AUTOMAKE_VERSION}.tar.gz.sig
-if [ $? -ne 0 ];
-then
-    echo "Warning: Error verifying automake. See comment at top of this file for more info"
-    sleep 1
-fi
+#gpg --verify automake-${AUTOMAKE_VERSION}.tar.gz.sig
+#if [ $? -ne 0 ];
+#then
+ #   echo "Warning: Error verifying automake. See comment at top of this file for more info"
+  #  sleep 1
+#fi
 
-gpg --verify libtool-${LIBTOOL_VERSION}.tar.gz.sig
-if [ $? -ne 0 ];
-then
-    echo "Warning: Error verifying libtool. See comment at top of this file for more info"
+#gpg --verify libtool-${LIBTOOL_VERSION}.tar.gz.sig
+#if [ $? -ne 0 ];
+#then
+ #   echo "Warning: Error verifying libtool. See comment at top of this file for more info"
     sleep 1
-fi
+#fi
 
 # Decompress
 gzip -dc m4-${M4_VERSION}.tar.gz | tar xvf -
